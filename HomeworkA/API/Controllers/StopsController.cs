@@ -1,20 +1,33 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Linq;
+using System.Collections.Generic;
 using System.Web.Http;
+using API.Models;
+using API.Services;
 
 namespace API.Controllers
 {
     public class StopsController : ApiController
     {
-        // GET stops
-        public IEnumerable<string> Get()
+        [Route("stops/{stopNumber}/arrivals")]
+        public IEnumerable<object> GetArrivals(int stopNumber, string time = null)
         {
-            return new string[] { "Stop 1", "Stop 2" };
-        }
+            var stopsService = new StopsService();
 
-        // GET stops/1
-        public string Get(int id)
-        {
-            return $"Stop {id}";
+            TimeSpan arrivalTime;
+
+            if (!String.IsNullOrWhiteSpace(time))
+            {
+                arrivalTime = TimeSpan.Parse(time);
+            }
+            else
+            {
+                arrivalTime = DateTime.Now.TimeOfDay;
+            }
+            
+            IEnumerable<ArrivalModel> arrivals = stopsService.GetClosestArrivalTimes(stopNumber, arrivalTime);
+
+            return arrivals;
         }
     }
 }

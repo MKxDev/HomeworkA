@@ -18,6 +18,8 @@ namespace API
                 defaults: new { id = RouteParameter.Optional }
             );
 
+            config.MapHttpAttributeRoutes();
+
             appBuilder.UseWebApi(config);
         }
     }
