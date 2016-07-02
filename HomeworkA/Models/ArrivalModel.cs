@@ -4,12 +4,12 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace API.Models
+namespace Models
 {
     public class ArrivalModel
     {
         public string RouteName { get; set; }
 
-        public IEnumerable<TimeSpan> ArrivalTimes { get; set; }
+        public IList<TimeSpan> ArrivalTimes { get; set; }
     }
 }

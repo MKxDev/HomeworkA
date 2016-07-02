@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using API.Models;
+using Models;
 using API.Helpers;
 
 namespace API.Services
@@ -18,12 +18,21 @@ namespace API.Services
         private const int StopDistanceInMinutes = 2;
         private const int MaxClosestArrivals = 2;
         
+        /// <summary>
+        /// Does basic validation and then calculates next arrival times for each route at the specified
+        /// stop.
+        /// </summary>
+        /// <param name="stopNumber">The stop for which to return route arrival times.</param>
+        /// <param name="atTime">The time, relative to which to return next arrival times.</param>
+        /// <returns></returns>
         public IEnumerable<ArrivalModel> GetClosestArrivalTimes(int stopNumber, TimeSpan atTime)
         {
+            // Basic validation
             if (stopNumber < 1 || stopNumber > MaxStopCount) throw new ArgumentOutOfRangeException("Stop must be within 1 and 10");
             
             var arrivals = new List<ArrivalModel>();
 
+            // Get arrival info for each route
             foreach (var item in Enumerable.Range(1, MaxRouteCount))
             {
                 var routeArrivals = GetNextArrivals(stopNumber, item, atTime);
@@ -31,22 +40,39 @@ namespace API.Services
                 arrivals.Add(new ArrivalModel
                 {
                     RouteName = $"Route {item}",
-                    ArrivalTimes = routeArrivals
+                    ArrivalTimes = routeArrivals.ToList()
                 });
             }
 
             return arrivals;
         }
 
+        /// <summary>
+        /// Gets next arrival times relative to atTime.
+        /// </summary>
+        /// <param name="stop">The stop for which to return route arrival time info.</param>
+        /// <param name="route">The route for which to return arrival time info.</param>
+        /// <param name="atTime">Time, relative to which to return arrival info.</param>
+        /// <returns></returns>
         private IEnumerable<TimeSpan> GetNextArrivals(int stop, int route, TimeSpan atTime)
         {
+            // Get all arrival times for the stop/route combo
             var serviceTimes = GetArrivalTimes(stop, route);
 
+            // Get the next closest arrival times
             var closestArrivals = GetClosestArrivalTime(serviceTimes, atTime, MaxClosestArrivals);
 
             return closestArrivals;
         }
 
+        /// <summary>
+        /// Method that checks arrival times in a round-robin manner to find the next arrival times
+        /// as specified by count.
+        /// </summary>
+        /// <param name="serviceTimes">The full list of arrival times.</param>
+        /// <param name="atTime">Time, relative to which to return arrival time info.</param>
+        /// <param name="count">The number of arrival times to return.</param>
+        /// <returns>List of arrival times.</returns>
         private IEnumerable<TimeSpan> GetClosestArrivalTime(IEnumerable<TimeSpan> serviceTimes, TimeSpan atTime, int count)
         {
             var closestTimes = new List<TimeSpan>(count);
@@ -58,6 +84,7 @@ namespace API.Services
 
                 TimeSpan retVal = TimeSpan.Zero;
 
+                // Flags that control when to start returning and how many items to return
                 bool firstMatchFound = false;
                 int needToTake = count;
                 
@@ -70,8 +97,10 @@ namespace API.Services
                     // This code block does two things
                     if (diff > TimeSpan.Zero && diff <= maxWaitTime || firstMatchFound)
                     {
+                        // Mark that it's done
                         firstMatchFound = true;
                         
+                        // Break or decrement as necessary
                         if (needToTake == 0)
                         {
                             break;

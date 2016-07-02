@@ -58,6 +58,13 @@
       <Project>{6e312b0f-acf4-49f2-862b-aa1c2ef93d8f}</Project>
       <Name>API</Name>
     </ProjectReference>
+    <ProjectReference Include="..\Models\Models.csproj">
+      <Project>{2bce68c0-fb5f-4cdd-96a8-d68f09e92f28}</Project>
+      <Name>Models</Name>
+    </ProjectReference>
+  </ItemGroup>
+  <ItemGroup>
+    <None Include="app.config" />
   </ItemGroup>
   <Choose>
     <When Condition="'$(VisualStudioVersion)' == '10.0' And '$(IsCodedUITest)' == 'True'">
