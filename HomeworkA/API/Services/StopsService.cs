@@ -24,7 +24,7 @@ namespace API.Services
         /// </summary>
         /// <param name="stopNumber">The stop for which to return route arrival times.</param>
         /// <param name="atTime">The time, relative to which to return next arrival times.</param>
-        /// <returns></returns>
+        /// <returns>Two next arrival times</returns>
         public IEnumerable<ArrivalModel> GetClosestArrivalTimes(int stopNumber, TimeSpan atTime)
         {
             // Basic validation
@@ -75,44 +75,16 @@ namespace API.Services
         /// <returns>List of arrival times.</returns>
         private IEnumerable<TimeSpan> GetClosestArrivalTime(IEnumerable<TimeSpan> serviceTimes, TimeSpan atTime, int count)
         {
-            var closestTimes = new List<TimeSpan>(count);
+            // Calculate total wait time based on the interval and the number of next arrivals we need (count)
+            var maxTotalWaitTime = new TimeSpan(0, StopServiceInterval * count, 0);
 
-            // Iterate only if necessary
-            if (count > 0)
+            var closestTimes = serviceTimes.Where(arrivalTime =>
             {
-                var maxWaitTime = new TimeSpan(0, StopServiceInterval, 0);
-
-                TimeSpan retVal = TimeSpan.Zero;
-
-                // Flags that control when to start returning and how many items to return
-                bool firstMatchFound = false;
-                int needToTake = count;
-                
-                // Go over the inifite list of arrival times and find the closest match
-                foreach (TimeSpan arrivalTime in serviceTimes.ToRoundRobinList())
-                {
-                    // Calculate the time difference between the current arrival time (arrivalTime) and given time (atTime)
-                    var diff = arrivalTime - atTime;
-                    
-                    // This code block does two things
-                    if (diff > TimeSpan.Zero && diff <= maxWaitTime || firstMatchFound)
-                    {
-                        // Mark that it's done
-                        firstMatchFound = true;
-                        
-                        // Break or decrement as necessary
-                        if (needToTake == 0)
-                        {
-                            break;
-                        }
-                        else
-                        {
-                            closestTimes.Add(arrivalTime);
-                            needToTake--;
-                        }
-                    }
-                }
-            }
+                // Calculate the time difference between the current arrival time (arrivalTime) and given time (atTime)
+                var diff = arrivalTime - atTime;
+                return diff > TimeSpan.Zero && diff <= maxTotalWaitTime;
+            })
+            .OrderBy(arrivalTime => arrivalTime - atTime);
 
             return closestTimes;
         }

@@ -28,9 +28,10 @@ namespace Consumer
             var timeNow = DateTime.Now;
 
             // Test 3:01 PM
-            //var timeNow = new DateTime(1900, 1, 1, 15, 1, 0, DateTimeKind.Local);
+            //timeNow = new DateTime(1900, 1, 1, 15, 1, 0, DateTimeKind.Local);
 
-            var now = timeNow.TimeOfDay;
+            // Create a time span ignoring the seconds
+            var now = new DateTime(timeNow.Year, timeNow.Month, timeNow.Day, timeNow.Hour, timeNow.Minute, 0).TimeOfDay;
 
             Console.WriteLine($"Checking for arrivals at {timeNow.ToString("h\\:mm tt")}");
 

@@ -101,7 +101,7 @@ namespace API.Test
         }
 
         [TestMethod]
-        public void StopsService_GetClosestArrivalTimes_WhenLastArrivalTimeIsAfterMidnight()
+        public void StopsService_GetClosestArrivalTimes_WhenLastArrivalTimeIsBeforeFirst()
         {
             // Arrange
             var timeSpan = new TimeSpan(0, 0, 0);
